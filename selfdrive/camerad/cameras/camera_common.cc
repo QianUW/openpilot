@@ -52,7 +52,7 @@ void CameraBuf::init(cl_device_id device_id, cl_context context, CameraState *s,
 
   const CameraInfo *ci = &s->ci;
   camera_state = s;
-  frame_buf_count = frame_cnt;
+  frame_buf_count = frame_cnt; // #define FRAME_BUF_COUNT 16
 
   // RAW frame
   const int frame_size = ci->frame_height * ci->frame_stride;
@@ -106,8 +106,10 @@ CameraBuf::~CameraBuf() {
 }
 
 bool CameraBuf::acquire() {
+  // safe_queue<int>, try_pop will wait for 1 millionseconds
   if (!safe_queue.try_pop(cur_buf_idx, 1)) return false;
 
+  // an array of FrameMetadata
   if (camera_bufs_metadata[cur_buf_idx].frame_id == -1) {
     LOGE("no frame data? wtf");
     release();
